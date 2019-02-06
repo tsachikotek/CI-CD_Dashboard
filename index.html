@@ -8,9 +8,13 @@
 <head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta http-equiv="refresh" content="3600" />
+    <meta http-equiv="Cache-control" content="no-cache">
+
     <title>Allot DevOps Dashboard</title>
     <meta name="description" content="Allot DevOps Dashboard">
     <meta name="viewport" content="width=device-width, initial-scale=1">
+
 
     <link rel="apple-touch-icon" href="apple-icon.png">
     <link rel="shortcut icon" href="favicon.ico">
@@ -45,7 +49,6 @@
 
     <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
 
-
     <script src="assets/js/dashboardCharts.js"></script>
     <script src="assets/js/jsPipeline.js"></script>
     <script src="assets/js/jsDefects.js"></script>
@@ -55,8 +58,22 @@
     <script src="assets/js/RestAPI.js"></script>
     <script src="assets/js/jsAutomation.js"></script>
 
-
     <style>
+        tspan {
+            font-size: 30px;
+            border: #c0c0c0 1px dotted;
+            padding: 5px 20px 5px 5px;
+            display: block;
+            z-index: 100;
+            background: url(../images/status-info.png) #f0f0f0 no-repeat 100% 5%;
+            left: 0px;
+            margin: 10px;
+            width: 250px;
+            position: absolute;
+            top: 10px;
+            text-decoration: none
+        }
+
         .menutoggle {
             background-image: linear-gradient(135deg, #faba23 0%,#ed6f23 25%,#ed1d24 50%,#ae1854 100%);
             /*animation: rotateAnimation 1s infinite linear;*/
@@ -112,6 +129,99 @@
             margin-left: -15px;
             width: 100%;
         }
+
+        #loader {
+            background: #272c33;
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            z-index: 1;
+            width: 150px;
+            height: 150px;
+            margin: -75px 0 0 -75px;
+            border: 16px solid #f3f3f3;
+            border-radius: 50%;
+            border-top: 16px solid #3498db;
+            width: 120px;
+            height: 120px;
+            -webkit-animation: spin 2s linear infinite;
+            animation: spin 2s linear infinite;
+        }
+
+        @-webkit-keyframes spin {
+            0% {
+                -webkit-transform: rotate(0deg);
+            }
+
+            100% {
+                -webkit-transform: rotate(360deg);
+            }
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        /* Add animation to "page content" */
+        .animate-bottom {
+            position: relative;
+            -webkit-animation-name: animatebottom;
+            -webkit-animation-duration: 1s;
+            animation-name: animatebottom;
+            animation-duration: 1s;
+        }
+
+        @-webkit-keyframes animatebottom {
+            from {
+                bottom: -100px;
+                opacity: 0;
+            }
+
+            to {
+                bottom: 0px;
+                opacity: 1;
+            }
+        }
+
+        @keyframes animatebottom {
+            from {
+                bottom: -100px;
+                opacity: 0;
+            }
+
+            to {
+                bottom: 0;
+                opacity: 1;
+            }
+        }
+
+        #main {
+            display: none;
+            text-align: center;
+        }
+
+        body {
+            background: #272c33;
+        }
+
+        .badge {
+            display: inline-block;
+            /* padding: .25em .4em; */
+            font-size: 75%;
+            font-weight: 700;
+            line-height: 1;
+            text-align: center;
+            white-space: normal;
+            vertical-align: baseline;
+            border-radius: .25rem;
+            background-color: #f8f9fa00;
+        }
         /*td {
             border: 1px solid black;
             width: 50px;
@@ -135,10 +245,26 @@
     </style>
 
 </head>
-<body>
+<body onload="myFunction()" style="margin:0;">
     <!--class="open" to close menu-->
     <!-- Left Panel -->
+    <div id="loader" class="navbar-header"></div>
 
+    <script>
+        var myVar;
+
+        function myFunction() {
+            myVar = setTimeout(showPage, 3000);
+        }
+
+        function showPage() {
+            document.getElementById("loader").style.display = "none";
+            document.getElementById("main").style.display = "block";
+            window.dispatchEvent(new Event('resize'));
+        }
+    </script>
+
+    <div id="main">
     <aside id="left-panel" class="left-panel">
         <!--<a id="menuToggle" class="menutoggle pull-left"><i class="fa fa fa-tasks"></i></a>-->
         <nav class="navbar navbar-expand-sm navbar-default">
@@ -179,7 +305,7 @@
                     </li>
                 </ul>
             </div>
-            
+
             <!-- /.navbar-collapse -->
         </nav>
     </aside><!-- /#left-panel -->
@@ -202,73 +328,95 @@
                 <a id="menuToggle" class="menutoggle pull-left"><i class="fa fa-exchange"></i></a>
             </div>
             <div id="messagePanel"></div>
+
         </div>
+
         <div class="content mt-3">
             <div class="card">
                 <div class="card-header">
-                    <h4>CI\CD</h4>
+                    <h1>Global Builds Information</h1>
                 </div>
-                <div class="card-body" id="main-global"></div>
+                <div class="card-body" id="globalStat"></div>
+            </div>
+        </div>
+
+
+        <div class="content mt-3">
+            <div class="card">
+                <div class="card-header">
+                    <!--<h1>Builds Trend</h1>-->
+                </div>
+                <div class="card-body" id="globalCharts"></div>
+            </div>
+        </div>
+
+        <div class="content mt-3">
+            <div class="card">
+                <div class="card-header">
+                    <h4>CI\CD [<a id="addServer"><i class="fa fa-plus" aria-hidden="true"></i>Add Server</a>]</h4>
+                </div>
+
                 <div class="card-body" id="cicd_status"></div>
                 <div class="card-body" id="running-pipelines"></div>
                 <div class="card-body" id="failed-pipelines"></div>
-            </div>     
+                <div class="card-body" id="main-global"></div>
+            </div>
 
 
         </div><!-- /#right-panel -->
-    <!-- Right Panel -->
-    <script src="assets/js/vendor/jquery-2.1.4.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.3/umd/popper.min.js"></script>
-    <script src="assets/js/plugins.js"></script>
-    <script src="assets/js/main.js"></script>
+        <!-- Right Panel -->
+        <script src="assets/js/vendor/jquery-2.1.4.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.3/umd/popper.min.js"></script>
+        <script src="assets/js/plugins.js"></script>
+        <script src="assets/js/main.js"></script>
 
-    <script src="assets/js/lib/chart-js/Chart.bundle.js"></script>
+        <script src="assets/js/lib/chart-js/Chart.bundle.js"></script>
 
-    <!--<script src="assets/js/dashboard.js"></script>-->
-    <script src="assets/js/dashboardCharts.js"></script>
-    <script src="assets/js/widgets.js"></script>
+        <script src="assets/js/dashboard.js"></script>
+        <script src="assets/js/dashboardCharts.js"></script>
+        <script src="assets/js/widgets.js"></script>
 
-    <script src="assets/js/jsPipeline.js"></script>
-    <script src="assets/js/jsDefects.js"></script>
+        <script src="assets/js/jsPipeline.js"></script>
+        <script src="assets/js/jsDefects.js"></script>
 
-    <script src="assets/js/lib/data-table/datatables.min.js"></script>
-    <script src="assets/js/lib/data-table/dataTables.bootstrap.min.js"></script>
-    <script src="assets/js/lib/data-table/dataTables.buttons.min.js"></script>
-    <script src="assets/js/lib/data-table/buttons.bootstrap.min.js"></script>
-    <script src="assets/js/lib/data-table/jszip.min.js"></script>
-    <script src="assets/js/lib/data-table/pdfmake.min.js"></script>
-    <script src="assets/js/lib/data-table/vfs_fonts.js"></script>
-    <script src="assets/js/lib/data-table/buttons.html5.min.js"></script>
-    <script src="assets/js/lib/data-table/buttons.print.min.js"></script>
-    <script src="assets/js/lib/data-table/buttons.colVis.min.js"></script>
-    <script src="assets/js/lib/data-table/datatables-init.js"></script>
+        <script src="assets/js/lib/data-table/datatables.min.js"></script>
+        <script src="assets/js/lib/data-table/dataTables.bootstrap.min.js"></script>
+        <script src="assets/js/lib/data-table/dataTables.buttons.min.js"></script>
+        <script src="assets/js/lib/data-table/buttons.bootstrap.min.js"></script>
+        <script src="assets/js/lib/data-table/jszip.min.js"></script>
+        <script src="assets/js/lib/data-table/pdfmake.min.js"></script>
+        <script src="assets/js/lib/data-table/vfs_fonts.js"></script>
+        <script src="assets/js/lib/data-table/buttons.html5.min.js"></script>
+        <script src="assets/js/lib/data-table/buttons.print.min.js"></script>
+        <script src="assets/js/lib/data-table/buttons.colVis.min.js"></script>
+        <script src="assets/js/lib/data-table/datatables-init.js"></script>
 
-    <script src="assets/js/lib/vector-map/jquery.vmap.js"></script>
-    <script src="assets/js/lib/vector-map/jquery.vmap.min.js"></script>
-    <script src="assets/js/lib/vector-map/jquery.vmap.sampledata.js"></script>
-    <script src="assets/js/lib/vector-map/country/jquery.vmap.world.js"></script>
+        <script src="assets/js/lib/vector-map/jquery.vmap.js"></script>
+        <script src="assets/js/lib/vector-map/jquery.vmap.min.js"></script>
+        <script src="assets/js/lib/vector-map/jquery.vmap.sampledata.js"></script>
+        <script src="assets/js/lib/vector-map/country/jquery.vmap.world.js"></script>
 
-    <script>
-        (function ($) {
-            "use strict";
+        <script>
+            (function ($) {
+                "use strict";
 
-            jQuery('#vmap').vectorMap({
-                map: 'world_en',
-                backgroundColor: null,
-                color: '#ffffff',
-                hoverOpacity: 0.7,
-                selectedColor: '#1de9b6',
-                enableZoom: true,
-                showTooltip: true,
-                values: sample_data,
-                scaleColors: ['#1de9b6', '#03a9f5'],
-                normalizeFunction: 'polynomial'
-            });
-        })(jQuery);
+                jQuery('#vmap').vectorMap({
+                    map: 'world_en',
+                    backgroundColor: null,
+                    color: '#ffffff',
+                    hoverOpacity: 0.7,
+                    selectedColor: '#1de9b6',
+                    enableZoom: true,
+                    showTooltip: true,
+                    values: sample_data,
+                    scaleColors: ['#1de9b6', '#03a9f5'],
+                    normalizeFunction: 'polynomial'
+                });
+            })(jQuery);
 
-        $('body').addClass('open');
-    </script>
+            $('body').addClass('open');
+        </script>
 
-
+    </div>
 </body>
 </html>
